@@ -115,10 +115,34 @@
                 scrollX: true,    // Adds horizontal scrolling if needed
                 lengthMenu: [10, 20, 50], // Options for rows per page
             });
+            $('#addPersonButton').on('click', function() {
+                $('#prefix').val('');
+                $('#first_name').val('');
+                $('#middle_name').val('');
+                $('#last_name').val('');
+                $('#other_last_name').val('');
+                $('#given_name').val('');
+                $('#date_of_birth').val('');
+                $('#town_of_birth').val('');
+                $('#country_of_birth').val('');
+                $('#civil_status').val('');
+                $('#Profession').val('');
+                $('#UserName').val('');
+                $('#ComputerName').val('');
+                $('#CreationDate').val('');
+                $('#UserNameLM').val('');
+                $('#ComputerNameLM').val('');
+                $('#DateModified').val('');
+                $('#TaxNumber').val('');
+                $('#digitoVerificadorRUC').val('');
+                $('#codigoUbicacion').val('');
+            });
+
             $('.editPersonButton').on('click', function() {
                 console.log($(this).data());
 
                 // Get data attributes from the clicked button
+                var personId = $(this).data('id_natural_person');
                 let prefix = $(this).data('prefix');
                 let first_name = $(this).data('first_name');
                 let middle_name = $(this).data('middle_name');
@@ -139,6 +163,11 @@
                 let TaxNumber = $(this).data('taxnumber');
                 let digitoVerificadorRUC = $(this).data('digitoverificadorruc');
                 let codigoUbicacion = $(this).data('codigoubicacion');
+
+
+                // Change the modal title
+                $('#naturalPersonModalLabel').text('Edit Person');
+
 
                 // Populate the modal form fields
                 $('#prefix').val(prefix);
@@ -162,6 +191,14 @@
                 $('#TaxNumber').val(TaxNumber);
                 $('#digitoVerificadorRUC').val(digitoVerificadorRUC);
                 $('#codigoUbicacion').val(codigoUbicacion);
+
+
+                // Set the form action to update the person (adjust this to your actual URL structure)
+                $('#personForm').attr('action', '{{ route('natural-person.update', ':id') }}'.replace(':id', personId));
+                $('input[name="_method"]').val('PUT');
+
+                // Change the form button text to 'Update'
+                $('#formButton').text('Update');
             });
         });
     </script>

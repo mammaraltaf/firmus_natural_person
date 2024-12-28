@@ -84,14 +84,8 @@ class NaturalPersonController extends Controller
      */
     public function update(Request $request, NaturalPerson $naturalPerson)
     {
-        $request->validate([
-            'first_name' => 'required|max:120',
-            'last_name' => 'required|max:120',
-            // Add more validation rules as needed
-        ]);
-
         $naturalPerson->update($request->all());
-        return redirect()->route('natural-persons.index')->with('success', 'Natural Person updated successfully!');
+        return redirect()->route('natural-person.index')->with('success', 'Natural Person updated successfully!');
     }
 
     /**

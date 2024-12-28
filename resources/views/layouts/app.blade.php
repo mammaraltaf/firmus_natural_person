@@ -17,6 +17,15 @@
 </nav>
 
 <div class="container mt-4">
+    <!-- Language Switch Dropdown -->
+    <form action="{{ route('language.switch') }}" method="POST">
+        @csrf
+        <select name="language" onchange="this.form.submit()">
+            <option value="en" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>English</option>
+            <option value="es" {{ app()->getLocale() == 'es' ? 'selected' : '' }}>Español</option>
+        </select>
+    </form>
+
     @yield('content')
 </div>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>

@@ -6,8 +6,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="personForm" method="post" action="{{route('store')}}">
+                <form id="personForm" method="post" action="{{route('natural-person.store')}}">
                     @csrf
+                    <input type="hidden" name="_method" value="PUT">
                     <div class="row g-3">
                         <!-- Prefix -->
                         <div class="col-md-4">
@@ -109,7 +110,7 @@
                         </div>
 
                         <div class="col-12">
-                            <button type="submit" class="btn btn-success">Save</button>
+                            <button type="submit" id="formButton" class="btn btn-success">Save</button>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         </div>
                     </div>
