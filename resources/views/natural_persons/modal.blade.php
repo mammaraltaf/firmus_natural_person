@@ -6,7 +6,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="personForm">
+                <form id="personForm" method="post" action="{{route('store')}}">
+                    @csrf
                     <div class="row g-3">
                         <!-- Prefix -->
                         <div class="col-md-4">
@@ -45,13 +46,13 @@
                         </div>
 
                         <!-- Date of Birth -->
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label for="date_of_birth" class="form-label">Date of Birth</label>
                             <input type="date" class="form-control" id="date_of_birth" name="date_of_birth">
                         </div>
 
                         <!-- Town of Birth -->
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label for="town_of_birth" class="form-label">Town of Birth</label>
                             <input type="text" class="form-control" id="town_of_birth" name="town_of_birth">
                         </div>
@@ -61,90 +62,50 @@
                             <label for="country_of_birth" class="form-label">Country of Birth</label>
                             <select id="country_of_birth" name="country_of_birth" class="form-select select2">
                                 <option value="">Select Country</option>
-                                <!-- Dynamic options will be populated here -->
+                                @foreach($countries as $country)
+                                    <option value="{{$country->id_country}}">{{$country->country_name_iso_3166 ?? $country->country_smv}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Civil Status Section -->
+                        <div class="col-md-4">
+                            <label for="civil_status" class="form-label">Civil Status</label>
+                            <select id="civil_status" name="civil_status" class="form-select select2">
+                                <option value="">Select Civil Status</option>
+                                @foreach($civilStatuses as $civilStatus)
+                                    <option value="{{$civilStatus->id}}">{{$civilStatus->type}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Professions Section -->
+                        <div class="col-md-4">
+                            <label for="Profession" class="form-label">Professions</label>
+                            <select id="Profession" name="Profession" class="form-select select2">
+                                <option value="">Select Professions</option>
+                                @foreach($professions as $profession)
+                                    <option value="{{$profession->ID}}">{{$profession->ActivityName}}</option>
+                                @endforeach
                             </select>
                         </div>
 
                         <!-- Tax Number -->
                         <div class="col-md-4">
                             <label for="tax_number" class="form-label">Tax Number</label>
-                            <input type="text" class="form-control" id="tax_number" name="tax_number">
+                            <input type="text" class="form-control" id="TaxNumber" name="TaxNumber">
                         </div>
 
                         <!-- Verifier Digit -->
                         <div class="col-md-4">
-                            <label for="digito_verificador_ruc" class="form-label">Verifier Digit (RUC)</label>
-                            <input type="text" class="form-control" id="digito_verificador_ruc" name="digito_verificador_ruc">
+                            <label for="digitoVerificadorRUC" class="form-label">digitoVerificadorRUC</label>
+                            <input type="text" class="form-control" id="digitoVerificadorRUC" name="digitoVerificadorRUC">
                         </div>
 
                         <!-- Location Code -->
                         <div class="col-md-4">
-                            <label for="codigo_ubicacion" class="form-label">Location Code</label>
-                            <input type="text" class="form-control" id="codigo_ubicacion" name="codigo_ubicacion">
-                        </div>
-
-                        <!-- Civil Status Section -->
-                        <div class="col-12">
-                            <h5>Civil Status</h5>
-                            <table class="table table-bordered" id="civilStatusTable">
-                                <thead>
-                                <tr>
-                                    <th>Type</th>
-                                    <th>Action</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td>
-                                        <input type="text" class="form-control" name="civil_status[]" placeholder="Enter civil status" required>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-danger remove-row">Remove</button>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                            <button type="button" class="btn btn-primary" id="addCivilStatusRow">Add Civil Status</button>
-                        </div>
-
-                        <!-- Professions Section -->
-                        <div class="col-12">
-                            <h5>Professions</h5>
-                            <table class="table table-bordered" id="professionsTable">
-                                <thead>
-                                <tr>
-                                    <th>Code</th>
-                                    <th>Activity Name</th>
-                                    <th>Risk Value</th>
-                                    <th>Risk Level</th>
-                                    <th>High Risk Automatic</th>
-                                    <th>Action</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td>
-                                        <input type="text" class="form-control" name="code[]" placeholder="Enter Code" required>
-                                    </td>
-                                    <td>
-                                        <input type="text" class="form-control" name="activity_name[]" placeholder="Enter Activity Name" required>
-                                    </td>
-                                    <td>
-                                        <input type="text" class="form-control" name="risk_value[]" placeholder="Enter Risk Value" required>
-                                    </td>
-                                    <td>
-                                        <input type="text" class="form-control" name="risk_level[]" placeholder="Enter Risk Level" required>
-                                    </td>
-                                    <td>
-                                        <input type="text" class="form-control" name="high_risk_automatic[]" placeholder="Enter High Risk Automatic" required>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-danger remove-row">Remove</button>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                            <button type="button" class="btn btn-primary" id="addProfessionRow">Add Profession</button>
+                            <label for="codigoUbicacion" class="form-label">codigoUbicacion</label>
+                            <input type="text" class="form-control" id="codigoUbicacion" name="codigoUbicacion">
                         </div>
 
                         <div class="col-12">

@@ -16,7 +16,10 @@ class NaturalPersonController extends Controller
     public function index()
     {
         $naturalPersons = NaturalPerson::with(['profession', 'civilStatus', 'country'])->get();
-        return view('natural_persons.index', compact('naturalPersons'));
+        $countries = CountryList::all();
+        $professions = Profession::all();
+        $civilStatuses = CivilStatus::all();
+        return view('natural_persons.index', compact('naturalPersons', 'countries', 'professions', 'civilStatuses'));
     }
 
     /**
@@ -35,14 +38,26 @@ class NaturalPersonController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'first_name' => 'required|max:120',
-            'last_name' => 'required|max:120',
-            // Add more validation rules as needed
+        $results = NaturalPerson::create([
+            'prefix' => $request->prefix,
+            'first_name' => $request->first_name,
+            'middle_name' => $request->middle_name,
+            'last_name' => $request->last_name,
+            'other_last_name' => $request->other_last_name,
+            'given_name' => $request->given_name,
+            'date_of_birth' => $request->date_of_birth,
+            'town_of_birth' => $request->town_of_birth,
+            'country_of_birth' => $request->country_of_birth,
+            'civil_status' => $request->civil_status,
+            'Profession' => $request->Profession,
+            'TaxNumber' => $request->TaxNumber,
+            'digitoVerificadorRUC' => $request->digitoVerificadorRUC,
+            'codigoUbicacion' => $request->codigoUbicacion,
         ]);
 
-        NaturalPerson::create($request->all());
-        return redirect()->route('natural-persons.index')->with('success', 'Natural Person created successfully!');
+        if ($results) {
+            return redirect()->route('index');
+        }
     }
 
     /**
