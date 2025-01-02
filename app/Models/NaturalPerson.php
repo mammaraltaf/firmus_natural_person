@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\old\CivilStatus;
+use App\Models\old\CountryList;
+use App\Models\old\Profession;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,9 +17,19 @@ class NaturalPerson extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'prefix', 'first_name', 'middle_name', 'last_name', 'other_last_name',
-        'given_name', 'date_of_birth', 'town_of_birth', 'country_of_birth',
-        'civil_status', 'Profession', 'TaxNumber', 'digitoVerificadorRUC',
+        'prefix',
+        'first_name',
+        'middle_name',
+        'last_name',
+        'other_last_name',
+        'given_name',
+        'date_of_birth',
+        'town_of_birth',
+        'country_of_birth',
+        'civil_status',
+        'Profession',
+        'TaxNumber',
+        'digitoVerificadorRUC',
         'codigoUbicacion'
     ];
 

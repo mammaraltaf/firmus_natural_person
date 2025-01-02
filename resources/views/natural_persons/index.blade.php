@@ -9,9 +9,10 @@
 @section('content')
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h4 class="card-title">Person List</h4>
+            <h4 class="card-title">{{ __('messages.person_list') }}</h4>
+
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#personModal" id="addPersonButton">
-                Add Person
+                {{ __('messages.add_person') }}
             </button>
         </div>
         <div class="card-body">
