@@ -2,10 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AddressNaturalPerson;
 use App\Models\CivilStatus;
+use App\Models\ContactType;
 use App\Models\CountryList;
+use App\Models\IdentityDocumentNaturalPerson;
+use App\Models\NationalityNaturalPerson;
 use App\Models\NaturalPerson;
+use App\Models\NaturalPersonContact;
 use App\Models\Profession;
+use App\Models\TypeOfAddress;
+use App\Models\TypeOfIdentityDocument;
 use Illuminate\Http\Request;
 
 class NaturalPersonController extends Controller
@@ -15,11 +22,16 @@ class NaturalPersonController extends Controller
      */
     public function index()
     {
-        $naturalPersons = NaturalPerson::with(['profession', 'civilStatus', 'country'])->get();
+        $naturalPersons = NaturalPerson::with([
+            'profession', 'civilStatus', 'country', 'nationalities.identifyDocumentNaturalPerson' , 'naturalPersonContacts' ,'addressNaturalPersons'
+        ])->get();
         $countries = CountryList::all();
         $professions = Profession::all();
         $civilStatuses = CivilStatus::all();
-        return view('natural_persons.index', compact('naturalPersons', 'countries', 'professions', 'civilStatuses'));
+        $addressType = TypeOfAddress::all();
+        $typeOfIdentityDocuments = TypeOfIdentityDocument::all();
+        $contactTypes = ContactType::all();
+        return view('natural_persons.index', compact('naturalPersons', 'countries', 'professions', 'civilStatuses', 'addressType', 'typeOfIdentityDocuments', 'contactTypes'));
     }
 
     /**
@@ -38,7 +50,7 @@ class NaturalPersonController extends Controller
      */
     public function store(Request $request)
     {
-        $results = NaturalPerson::create([
+        $naturalPerson = NaturalPerson::create([
             'prefix' => $request->prefix,
             'first_name' => $request->first_name,
             'middle_name' => $request->middle_name,
@@ -50,13 +62,68 @@ class NaturalPersonController extends Controller
             'country_of_birth' => $request->country_of_birth,
             'civil_status' => $request->civil_status,
             'Profession' => $request->Profession,
-            'TaxNumber' => $request->TaxNumber,
+            'TaxNumber' => $request->taxNumber,
             'digitoVerificadorRUC' => $request->digitoVerificadorRUC,
             'codigoUbicacion' => $request->codigoUbicacion,
         ]);
 
-        if ($results) {
-            return redirect()->route('index');
+        // Handle dynamic fields (Contacts, Addresses, Nationalities, and Nationality Documents)
+        if ($request->has('contacts')) {
+            foreach ($request->contacts as $contact) {
+                // Save each contact data here, e.g., Contact model
+                NaturalPersonContact::create([
+                    'IDNaturalPerson' => $naturalPerson->id_natural_person,
+                    'IDContactType' => $contact['type'],
+                    'Data' => $contact['value'],
+                    'Note' => $contact['description'],
+                    'Authorized' => array_key_exists('authorized',$contact) ? 1 : 0,
+                ]);
+            }
+        }
+
+        if ($request->has('nationalities')) {
+            foreach ($request->nationalities as $nationality) {
+                // Save each nationality data here, e.g., Nationality model
+                NationalityNaturalPerson::create([
+                    'id_natural_person' => $naturalPerson->id_natural_person,
+                    'id_country' => $nationality['country'],
+                ]);
+            }
+        }
+
+        if ($request->has('nationality_documents')) {
+            foreach ($request->nationality_documents as $document) {
+                // Save each nationality document data here, e.g., NationalityDocument model
+                IdentityDocumentNaturalPerson::create([
+//                    'id_natural_person' => $naturalPerson->id_natural_person,
+//                    'id_nationality' => $document['nationality'],
+                    'type_of_identity_document' => $document['type'],
+                    'reference_number' => $document['reference'],
+                    'expiration_date' => $document['expiration'],
+                ]);
+            }
+        }
+
+        if ($request->has('addresses')) {
+            foreach ($request->addresses as $address) {
+                // Save each address data here, e.g., Address model
+                AddressNaturalPerson::create([
+                    'id_natural_person' => $naturalPerson->id_natural_person,
+                    'type' => $address['type'],
+                    'street_name' => $address['street'],
+                    'number' => $address['number'],
+                    'apartment' => $address['apartment'],
+                    'district' => $address['district'],
+                    'postal_code' => $address['postal'],
+                    'city' => $address['city'],
+                    'province' => $address['province'],
+                    'country' => $address['country'],
+                ]);
+            }
+        }
+
+        if ($naturalPerson) {
+            return redirect()->route('natural-person.index');
         }
     }
 

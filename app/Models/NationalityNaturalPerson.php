@@ -6,6 +6,7 @@ use App\Models\old\CountryList;
 use App\Models\old\NaturalPerson;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class NationalityNaturalPerson extends Model
 {
@@ -25,5 +26,10 @@ class NationalityNaturalPerson extends Model
     public function CountryList()
     {
         return $this->belongsTo(CountryList::class, 'id_country');
+    }
+
+    public function identifyDocumentNaturalPerson() : HasMany
+    {
+        return $this->hasMany(IdentityDocumentNaturalPerson::class, 'id_nationality','id_nationality');
     }
 }

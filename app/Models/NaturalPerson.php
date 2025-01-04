@@ -7,6 +7,7 @@ use App\Models\old\CountryList;
 use App\Models\old\Profession;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class NaturalPerson extends Model
 {
@@ -35,16 +36,32 @@ class NaturalPerson extends Model
 
     public function profession()
     {
-        return $this->belongsTo(Profession::class, 'Profession');
+        return $this->belongsTo(Profession::class, 'Profession', 'ID');
     }
 
     public function civilStatus()
     {
-        return $this->belongsTo(CivilStatus::class, 'civil_status');
+        return $this->belongsTo(CivilStatus::class, 'civil_status', 'id');
     }
 
     public function country()
     {
-        return $this->belongsTo(CountryList::class, 'country_of_birth');
+        return $this->belongsTo(CountryList::class, 'country_of_birth', 'id_country');
+    }
+
+
+    public function nationalities(): HasMany
+    {
+        return $this->hasMany(NationalityNaturalPerson::class,'id_natural_person','id_natural_person');
+    }
+
+    public function naturalPersonContacts(): HasMany
+    {
+        return $this->hasMany(NaturalPersonContact::class, 'IDNaturalPerson', 'id_natural_person');
+    }
+
+    public function addressNaturalPersons(): HasMany
+    {
+        return $this->hasMany(AddressNaturalPerson::class, 'id_natural_person' , 'id_natural_person');
     }
 }

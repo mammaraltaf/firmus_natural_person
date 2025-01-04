@@ -17,14 +17,9 @@
 </nav>
 
 <div class="container mt-4">
-    <!-- Language Switch Dropdown -->
-    <form action="{{ route('language.switch') }}" method="POST">
-        @csrf
-        <select name="language" onchange="this.form.submit()">
-            <option value="en" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>English</option>
-            <option value="es" {{ app()->getLocale() == 'es' ? 'selected' : '' }}>Español</option>
-        </select>
-    </form>
+    <a href="{{ route('setLocale', 'en') }}">English</a> |
+    <a href="{{ route('setLocale', 'es') }}">Español</a>
+
 
     @yield('content')
 </div>

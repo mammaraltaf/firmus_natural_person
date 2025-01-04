@@ -2,7 +2,7 @@
 
 @section('title', 'Person Management')
 @section('styles')
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css"/>
 
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
 @endsection
@@ -12,34 +12,21 @@
             <h4 class="card-title">{{ __('messages.person_list') }}</h4>
 
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#personModal" id="addPersonButton">
-                {{ __('messages.add_person') }}
+                {{ __('messages.add_natural_person') }}
             </button>
         </div>
         <div class="card-body">
-            <table id="personTable" class="table table-striped table-bordered display responsive nowrap" >
+            <table id="personTable" class="table table-striped table-bordered display responsive nowrap">
                 <thead>
                 <tr>
                     <th>Id</th>
-                    <th>Prefix</th>
-                    <th>First Name</th>
-                    <th>Middle Name</th>
-                    <th>Last Name</th>
-                    <th>Other Last Name</th>
-                    <th>Given Name</th>
-                    <th>Date of Birth</th>
-                    <th>Town of Birth</th>
-                    <th>Country of birth</th>
-                    <th>Civil status</th>
-                    <th>Profession</th>
-                    <th>User Name</th>
-                    <th>Computer Name</th>
-                    <th>Creation Date</th>
-                    <th>UserName LM</th>
-                    <th>Computer NameLM</th>
-                    <th>Date Modified</th>
-                    <th>Tax Number</th>
-                    <th>digitoVerificadorRUC</th>
-                    <th>codigoUbicacion</th>
+                    <th>{{ __('messages.name') }}</th>
+                    <th>{{ __('messages.birth') }}</th>
+                    <th>{{ __('messages.civil_status') }}</th>
+                    <th>{{ __('messages.profession') }}</th>
+                    <th>{{ __('messages.invoice') }}</th>
+                    <th>{{ __('messages.contact') }}</th>
+                    <th>{{ __('messages.nationality') }}</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -47,26 +34,43 @@
                 @foreach($naturalPersons as $person)
                     <tr>
                         <td>{{$person->id_natural_person  ?? ''}}</td>
-                        <td>{{$person->prefix ?? ''}}</td>
-                        <td>{{$person->first_name ?? ''}}</td>
-                        <td>{{$person->middle_name ?? ''}}</td>
-                        <td>{{$person->last_name ?? ''}}</td>
-                        <td>{{$person->other_last_name ?? ''}}</td>
-                        <td>{{$person->given_name ?? ''}}</td>
-                        <td>{{$person->date_of_birth ?? ''}}</td>
-                        <td>{{$person->town_of_birth ?? ''}}</td>
-                        <td>{{$person->country_of_birth ?? ''}}</td>
-                        <td>{{$person->civil_status ?? ''}}</td>
-                        <td>{{$person->Profession ?? ''}}</td>
-                        <td>{{$person->UserName ?? ''}}</td>
-                        <td>{{$person->ComputerName ?? ''}}</td>
-                        <td>{{$person->CreationDate ?? ''}}</td>
-                        <td>{{$person->UserNameLM ?? ''}}</td>
-                        <td>{{$person->ComputerNameLM ?? ''}}</td>
-                        <td>{{$person->DateModified ?? ''}}</td>
-                        <td>{{$person->TaxNumber ?? ''}}</td>
-                        <td>{{$person->digitoVerificadorRUC ?? ''}}</td>
-                        <td>{{$person->codigoUbicacion ?? ''}}</td>
+                        <td>
+                            {{$person->prefix .' '. $person->first_name.' '.$person->middle_name.' '.$person->last_name}}
+                        </td>
+                        <td>
+                            <b>DOB:</b> {{Carbon\Carbon::parse($person->date_of_birth)->format('m/d/Y')}}<br>
+                            <b>Town:</b> {{$person->town_of_birth ?? ''}} <br>
+                            <b>Country:</b> {{\App\Models\CountryList::where('id_country',$person->country_of_birth)->first()->country_smv}}
+                            <br>
+                        </td>
+                        <td>{{\App\Models\CivilStatus::where('id',$person->civil_status)->first()?->type ?? ''}}</td>
+                        <td>{{\App\Models\Profession::where('id',$person->Profession)->first()?->ActivityName ?? ''}}</td>
+                        <td>
+                            <b>Tax:</b> {{$person->TaxNumber ?? ''}} <br>
+                            <b>digitoVerificadorRUC:</b> {{$person->digitoVerificadorRUC ?? ''}} <br>
+                            <b>codigoUbicacion:</b> {{$person->codigoUbicacion ?? ''}}
+                        </td>
+                        <td>
+                            @foreach($person->naturalPersonContacts as $contact)
+                                <b>Type</b> {{\App\Models\ContactType::where('ID',$contact->IDContactType)->first()?->Type}}
+                                <br>
+                                <b>Value</b> {{$contact->Data}}
+                            @endforeach
+                        </td>
+                        <td>
+                            @foreach($person->nationalities as $nationality)
+                                <b>Nationality</b> {{\App\Models\CountryList::where('id_country',$nationality->id_country)->first()?->country_smv}}
+                                <br>
+                                @if($nationality->identifyDocumentNaturalPerson != null)
+                                    <b>Documents:</b><br>
+                                    @foreach($nationality->identifyDocumentNaturalPerson as $document)
+                                        <b>Type</b> {{\App\Models\TypeOfIdentityDocument::where('id',$document->type_of_identity_document)->first()?->type }}
+                                        <br>
+                                        <b>Reference</b> {{ $document->reference_number}} <br>
+                                    @endforeach
+                                @endif
+                            @endforeach
+                        </td>
                         <td>
                             <button
                                 class="btn btn-sm btn-warning editPersonButton"
@@ -109,14 +113,14 @@
 @push('scripts')
     <script>
         $(document).ready(function () {
-            $('#personTable').DataTable( {
+            $('#personTable').DataTable({
                 responsive: true, // Enables the responsive feature
                 paging: true,     // Adds pagination
                 searching: true,  // Enables the search box
                 scrollX: true,    // Adds horizontal scrolling if needed
                 lengthMenu: [10, 20, 50], // Options for rows per page
             });
-            $('#addPersonButton').on('click', function() {
+            $('#addPersonButton').on('click', function () {
                 $('#prefix').val('');
                 $('#first_name').val('');
                 $('#middle_name').val('');
@@ -139,7 +143,7 @@
                 $('#codigoUbicacion').val('');
             });
 
-            $('.editPersonButton').on('click', function() {
+            $('.editPersonButton').on('click', function () {
                 console.log($(this).data());
 
                 // Get data attributes from the clicked button
