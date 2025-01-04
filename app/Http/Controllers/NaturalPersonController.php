@@ -84,25 +84,26 @@ class NaturalPersonController extends Controller
         if ($request->has('nationalities')) {
             foreach ($request->nationalities as $nationality) {
                 // Save each nationality data here, e.g., Nationality model
-                NationalityNaturalPerson::create([
+               $nationalityNaturalPerson =  NationalityNaturalPerson::create([
                     'id_natural_person' => $naturalPerson->id_natural_person,
                     'id_country' => $nationality['country'],
                 ]);
+
+                if ($request->has('nationality_documents')) {
+                    foreach ($request->nationality_documents as $document) {
+                        // Save each nationality document data here, e.g., NationalityDocument model
+                        IdentityDocumentNaturalPerson::create([
+//                    'id_natural_person' => $naturalPerson->id_natural_person,
+                            'id_nationality' => $nationalityNaturalPerson->id_nationality,
+                            'type_of_identity_document' => $document['type'],
+                            'reference_number' => $document['reference'],
+                            'expiration_date' => $document['expiration'],
+                        ]);
+                    }
+                }
             }
         }
 
-        if ($request->has('nationality_documents')) {
-            foreach ($request->nationality_documents as $document) {
-                // Save each nationality document data here, e.g., NationalityDocument model
-                IdentityDocumentNaturalPerson::create([
-//                    'id_natural_person' => $naturalPerson->id_natural_person,
-//                    'id_nationality' => $document['nationality'],
-                    'type_of_identity_document' => $document['type'],
-                    'reference_number' => $document['reference'],
-                    'expiration_date' => $document['expiration'],
-                ]);
-            }
-        }
 
         if ($request->has('addresses')) {
             foreach ($request->addresses as $address) {
