@@ -18,7 +18,12 @@ Route::get('/locale/{locale}', function ($locale) {
     return redirect()->back();
 })->name('setLocale');
 
+Route::get('/', [NaturalPersonController::class,'dbSchema'])->name('dbSchema');
+Route::post('/database-config', [NaturalPersonController::class, 'saveDatabaseConfig'])->name('database.config.save');
+
 Route::resource('/natural-person', NaturalPersonController::class)->names('natural-person');
+Route::get('/import-natural-person', [NaturalPersonController::class,'import'])->name('natural-person.import');
+Route::post('/import-natural-person', [NaturalPersonController::class,'importNaturalPerson'])->name('natural-person.import.post');
 //Route::resource('professions', ProfessionController::class);
 //Route::resource('civil-statuses', CivilStatusController::class);
 //Route::resource('country-lists', CountryListController::class);

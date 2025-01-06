@@ -13,10 +13,15 @@ use App\Models\NaturalPersonContact;
 use App\Models\Profession;
 use App\Models\TypeOfAddress;
 use App\Models\TypeOfIdentityDocument;
+use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class NaturalPersonController extends Controller
 {
+    public function dbSchema(){
+        return view('db-schema');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -163,5 +168,91 @@ class NaturalPersonController extends Controller
     {
         $naturalPerson->delete();
         return redirect()->route('natural-persons.index')->with('success', 'Natural Person deleted successfully!');
+    }
+
+    public function saveDatabaseConfig(Request $request)
+    {
+        $request->validate([
+            'DB_CONNECTION' => 'required|string',
+            'DB_HOST' => 'required|string',
+            'DB_PORT' => 'required|integer',
+            'DB_DATABASE' => 'required|string',
+            'DB_USERNAME' => 'required|string',
+            'DB_PASSWORD' => 'nullable|string',
+        ]);
+
+        $envFile = app()->environmentFilePath();
+        $str = file_get_contents($envFile);
+
+        $str = preg_replace("/DB_CONNECTION=.*/", "DB_CONNECTION=" . $request->DB_CONNECTION, $str);
+        $str = preg_replace("/DB_HOST=.*/", "DB_HOST=" . $request->DB_HOST, $str);
+        $str = preg_replace("/DB_PORT=.*/", "DB_PORT=" . $request->DB_PORT, $str);
+        $str = preg_replace("/DB_DATABASE=.*/", "DB_DATABASE=" . $request->DB_DATABASE, $str);
+        $str = preg_replace("/DB_USERNAME=.*/", "DB_USERNAME=" . $request->DB_USERNAME, $str);
+        $str = preg_replace("/DB_PASSWORD=.*/", "DB_PASSWORD=" . $request->DB_PASSWORD, $str);
+
+        file_put_contents($envFile, $str);
+
+        return redirect()->back()->with('success', 'Database configuration updated successfully!');
+    }
+
+    public function import()
+    {
+        $ff_apn_es_natural_persons = DB::table('FOR_FF_APN_ES')->select(
+            'id','Contract_Type','Part_Rel','Part_Rel_Raison','E_Name','E_surname','E_Country','E_C_Status','E_ID_type','E_ID_No',
+            'E_ID_Expire_Date','E_Birth_Date','E_Birth_Place','E_Email','E_Profession','E_Profession_Current','E_Home_Adress','E_Home_Adress_Number','E_Home_Postal_Adress','E_Home_Fax',
+            'E_Office_Adress','E_Office_Number','E_Office_Postal_Adress','E_Office_Fax','E_Salary_Independ','account_number'
+        )->get();
+
+        return view('natural_persons.import-natural-person', compact('ff_apn_es_natural_persons'));
+    }
+
+    public function importNaturalPerson(Request $request)
+    {
+        $ff_apn_es_ids = $request->naturalPersons;
+        foreach($ff_apn_es_ids as $ff_apn_es_id){
+            $ff_apn_es_record = DB::table('FOR_FF_APN_ES')->select(
+                'id','Contract_Type','Part_Rel','Part_Rel_Raison','E_Name','E_surname','E_Country','E_C_Status','E_ID_type','E_ID_No',
+                'E_ID_Expire_Date','E_Birth_Date','E_Birth_Place','E_Email','E_Profession','E_Profession_Current','E_Home_Adress','E_Home_Adress_Number','E_Home_Postal_Adress','E_Home_Fax',
+                'E_Office_Adress','E_Office_Number','E_Office_Postal_Adress','E_Office_Fax','E_Salary_Independ','account_number'
+            )->where('id',$ff_apn_es_id)->first();
+
+
+            NaturalPerson::updateOrCreate(
+                [
+                    'first_name' => $ff_apn_es_record->E_Name,
+                    'last_name' => $ff_apn_es_record->E_surname,
+                    'date_of_birth' => $ff_apn_es_record->E_Birth_Date ?? null,
+                    'town_of_birth' => $ff_apn_es_record->E_Birth_Place,
+                    'country_of_birth' => $ff_apn_es_record->E_Country,
+                    'civil_status' => $ff_apn_es_record->E_C_Status,
+                    'Profession' => $ff_apn_es_record->E_Profession,
+                ],
+                [
+                    'first_name' => $ff_apn_es_record->E_Name,
+                    'last_name' => $ff_apn_es_record->E_surname,
+                    'date_of_birth' => self::validateDate($ff_apn_es_record->E_Birth_Date) ? $ff_apn_es_record->E_Birth_Date : null,
+                    'town_of_birth' => $ff_apn_es_record->E_Birth_Place,
+                    'country_of_birth' => $ff_apn_es_record->E_Country,
+                    'civil_status' => $ff_apn_es_record->E_C_Status,
+                    'Profession' => $ff_apn_es_record->E_Profession,
+                ]
+            );
+        }
+
+        return redirect()->route('natural-person.index');
+    }
+
+    /**
+     * Helper function to validate date format.
+     *
+     * @param string $date
+     * @param string $format
+     * @return bool
+     */
+    public static function validateDate($date, $format = 'Y-m-d')
+    {
+        $d = DateTime::createFromFormat($format, $date);
+        return $d && $d->format($format) === $date && $date !== '0000-00-00';
     }
 }

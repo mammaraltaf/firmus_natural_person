@@ -42,6 +42,15 @@
                         </li>
                     </ul>
                 </li>
+
+                <!-- New Navbar Item for Natural Person -->
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('natural-person.index') }}">Natural Person</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('natural-person.import') }}">Import Natural Person</a>
+                </li>
             </ul>
         </div>
     </div>
