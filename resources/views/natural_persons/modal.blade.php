@@ -122,30 +122,14 @@
 
                     <!-- Nationality Data Section -->
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="card mb-4">
-                                <div class="card-header">Nationality</div>
-                                <div class="card-body">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                        <tr>
-                                            <th>Nationality</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="nationalityTableBody"></tbody>
-                                    </table>
-                                    <button type="button" class="btn btn-primary" onclick="addNationalityRow(event)">Add Nationality</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="card mb-4">
                                 <div class="card-header">Nationality Document</div>
                                 <div class="card-body">
                                     <table class="table table-bordered">
                                         <thead>
                                         <tr>
+                                            <th>Nationality</th>
                                             <th>Type</th>
                                             <th>Reference Number</th>
                                             <th>Expiration Date</th>
@@ -210,7 +194,7 @@
         <td><input type="text" class="form-control" name="contacts[${rowCount}][value]" placeholder="Value"></td>
         <td><input type="text" class="form-control" name="contacts[${rowCount}][description]" placeholder="Description/Notes"></td>
         <td><input type="checkbox" name="contacts[${rowCount}][authorized]"></td>
-        <td><button class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button></td>
+        <td><button type="button" class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button></td>
     `;
         tableBody.appendChild(newRow);
     }
@@ -239,27 +223,11 @@
 @foreach($countries as $country)
                 <option value="{{$country->id_country}}">{{$country->country_name_iso_3166 ?? $country->country_smv}}</option>@endforeach
             </select></td>
-<td><button class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button></td>
+<td><button type="button" class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button></td>
 `;
         tableBody.appendChild(newRow);
     }
 
-    function addNationalityRow(event) {
-        event.preventDefault();
-        const tableBody = document.getElementById('nationalityTableBody');
-        const rowCount = tableBody.querySelectorAll('tr').length; // Get the current row count
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-        <td><select id="country" name="nationalities[${rowCount}][country]" class="form-select select2">
-            <option value="">Select Country</option>
-@foreach($countries as $country)
-        <option value="{{$country->id_country}}">{{$country->country_name_iso_3166 ?? $country->country_smv}}</option>@endforeach
-        </select></td>
-        <td><button class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button></td>
-
-`;
-        tableBody.appendChild(newRow);
-    }
 
     function addNationalityDocumentsRow(event) {
         event.preventDefault();
@@ -267,6 +235,11 @@
         const rowCount = tableBody.querySelectorAll('tr').length; // Get the current row count
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
+         <td><select id="country" name="nationality_documents[${rowCount}][country]" class="form-select select2">
+            <option value="">Select Country</option>
+@foreach($countries as $country)
+        <option value="{{$country->id_country}}">{{$country->country_name_iso_3166 ?? $country->country_smv}}</option>@endforeach
+        </select></td>
         <td><select id="country" name="nationality_documents[${rowCount}][type]" class="form-select select2">
             <option value="">Select Type</option>
 @foreach($typeOfIdentityDocuments as $document)
@@ -274,8 +247,13 @@
         </select></td>
             <td><input type="text" name="nationality_documents[${rowCount}][reference]" class="form-control" placeholder="Reference Number"></td>
             <td><input type="date" name="nationality_documents[${rowCount}][expiration]" class="form-control" placeholder="Expiration Date"></td>
-            <td><button class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button></td>
+        <td><button type="button" class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button></td>
         `;
         tableBody.appendChild(newRow);
+    }
+
+    function deleteRow(button) {
+        const row = button.closest('tr');
+        row.remove();
     }
 </script>

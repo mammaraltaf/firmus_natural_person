@@ -86,28 +86,30 @@ class NaturalPersonController extends Controller
             }
         }
 
-        if ($request->has('nationalities')) {
-            foreach ($request->nationalities as $nationality) {
-                // Save each nationality data here, e.g., Nationality model
-               $nationalityNaturalPerson =  NationalityNaturalPerson::create([
-                    'id_natural_person' => $naturalPerson->id_natural_person,
-                    'id_country' => $nationality['country'],
-                ]);
 
-                if ($request->has('nationality_documents')) {
-                    foreach ($request->nationality_documents as $document) {
-                        // Save each nationality document data here, e.g., NationalityDocument model
-                        IdentityDocumentNaturalPerson::create([
-//                    'id_natural_person' => $naturalPerson->id_natural_person,
-                            'id_nationality' => $nationalityNaturalPerson->id_nationality,
-                            'type_of_identity_document' => $document['type'],
-                            'reference_number' => $document['reference'],
-                            'expiration_date' => $document['expiration'],
-                        ]);
-                    }
-                }
+        if ($request->has('nationality_documents')) {
+            foreach ($request->nationality_documents as $document) {
+                // Check if a nationality record exists for this natural person and country
+                $nationalityNaturalPerson = NationalityNaturalPerson::firstOrCreate(
+                    [
+                        'id_natural_person' => $naturalPerson->id_natural_person,
+                        'id_country' => $document['country']
+                    ],
+                    [
+                    ]
+                );
+
+                // Save the document linked to the nationality
+                IdentityDocumentNaturalPerson::create([
+                    'id_nationality' => $nationalityNaturalPerson->id_nationality,
+                    'type_of_identity_document' => $document['type'],
+                    'reference_number' => $document['reference'],
+                    'expiration_date' => $document['expiration'],
+                ]);
             }
         }
+
+
 
 
         if ($request->has('addresses')) {
@@ -218,6 +220,8 @@ class NaturalPersonController extends Controller
             )->where('id',$ff_apn_es_id)->first();
 
 
+            $civilStatus = strtolower(trim($ff_apn_es_record->E_C_Status));
+
             NaturalPerson::updateOrCreate(
                 [
                     'first_name' => $ff_apn_es_record->E_Name,
@@ -225,7 +229,7 @@ class NaturalPersonController extends Controller
                     'date_of_birth' => $ff_apn_es_record->E_Birth_Date ?? null,
                     'town_of_birth' => $ff_apn_es_record->E_Birth_Place,
                     'country_of_birth' => $ff_apn_es_record->E_Country,
-                    'civil_status' => $ff_apn_es_record->E_C_Status,
+                    'civil_status' => $civilStatus,
                     'Profession' => $ff_apn_es_record->E_Profession,
                 ],
                 [
@@ -234,7 +238,7 @@ class NaturalPersonController extends Controller
                     'date_of_birth' => self::validateDate($ff_apn_es_record->E_Birth_Date) ? $ff_apn_es_record->E_Birth_Date : null,
                     'town_of_birth' => $ff_apn_es_record->E_Birth_Place,
                     'country_of_birth' => $ff_apn_es_record->E_Country,
-                    'civil_status' => $ff_apn_es_record->E_C_Status,
+                    'civil_status' => $civilStatus,
                     'Profession' => $ff_apn_es_record->E_Profession,
                 ]
             );
