@@ -209,7 +209,6 @@ class NaturalPersonController extends Controller
 
         // Update Nationality Documents
         if ($request->has('nationality_documents')) {
-            dd($request->nationality_documents);
             foreach ($request->nationality_documents as $document) {
                 // Check or create nationality record
                 $nationalityNaturalPerson = NationalityNaturalPerson::firstOrCreate(
