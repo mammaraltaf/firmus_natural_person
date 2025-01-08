@@ -167,11 +167,99 @@ class NaturalPersonController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, NaturalPerson $naturalPerson)
+    public function update(Request $request, $id)
     {
-        $naturalPerson->update($request->all());
-        return redirect()->route('natural-person.index')->with('success', 'Natural Person updated successfully!');
+        // Retrieve the NaturalPerson record
+        $naturalPerson = NaturalPerson::findOrFail($id);
+
+        // Update the NaturalPerson fields
+        $naturalPerson->update([
+            'prefix' => $request->prefix,
+            'first_name' => $request->first_name,
+            'middle_name' => $request->middle_name,
+            'last_name' => $request->last_name,
+            'other_last_name' => $request->other_last_name,
+            'given_name' => $request->given_name,
+            'date_of_birth' => $request->date_of_birth,
+            'town_of_birth' => $request->town_of_birth,
+            'country_of_birth' => $request->country_of_birth,
+            'civil_status' => $request->civil_status,
+            'Profession' => $request->Profession,
+            'TaxNumber' => $request->taxNumber,
+            'digitoVerificadorRUC' => $request->digitoVerificadorRUC,
+            'codigoUbicacion' => $request->codigoUbicacion,
+        ]);
+
+        // Update Contacts
+        if ($request->has('contacts')) {
+            // Delete existing contacts for this natural person
+            NaturalPersonContact::where('IDNaturalPerson', $naturalPerson->id_natural_person)->delete();
+
+            // Add updated contacts
+            foreach ($request->contacts as $contact) {
+                NaturalPersonContact::create([
+                    'IDNaturalPerson' => $naturalPerson->id_natural_person,
+                    'IDContactType' => $contact['type'],
+                    'Data' => $contact['value'],
+                    'Note' => $contact['description'],
+                    'Authorized' => array_key_exists('authorized', $contact) ? 1 : 0,
+                ]);
+            }
+        }
+
+        // Update Nationality Documents
+        if ($request->has('nationality_documents')) {
+            dd($request->nationality_documents);
+            foreach ($request->nationality_documents as $document) {
+                // Check or create nationality record
+                $nationalityNaturalPerson = NationalityNaturalPerson::firstOrCreate(
+                    [
+                        'id_natural_person' => $naturalPerson->id_natural_person,
+                        'id_country' => $document['country']
+                    ],
+                    []
+                );
+
+                // Update or create the identity document
+                IdentityDocumentNaturalPerson::updateOrCreate(
+                    [
+                        'id_nationality' => $nationalityNaturalPerson->id_nationality,
+                        'type_of_identity_document' => $document['type'],
+                    ],
+                    [
+                        'reference_number' => $document['reference_number'],
+                        'expiration_date' => $document['expiration_date'],
+                    ]
+                );
+            }
+        }
+
+        // Update Addresses
+        if ($request->has('addresses')) {
+            // Delete existing addresses for this natural person
+            AddressNaturalPerson::where('id_natural_person', $naturalPerson->id_natural_person)->delete();
+
+            // Add updated addresses
+            foreach ($request->addresses as $address) {
+                AddressNaturalPerson::create([
+                    'id_natural_person' => $naturalPerson->id_natural_person,
+                    'type' => array_key_exists('type', $address) ? $address['type'] : null,
+                    'street_name' => array_key_exists('street_name', $address) ? $address['street_name'] : null,
+                    'number' => array_key_exists('number', $address) ? $address['number'] : null,
+                    'apartment' => array_key_exists('apartment', $address) ? $address['apartment'] : null,
+                    'district' => array_key_exists('district', $address) ? $address['district'] : null,
+                    'postal_code' => array_key_exists('postal_code', $address) ? $address['postal_code'] : null,
+                    'city' => array_key_exists('city', $address) ? $address['city'] : null,
+                    'province' => array_key_exists('province', $address) ? $address['province'] : null,
+                    'country' => array_key_exists('country', $address) ? $address['country'] : null,
+                ]);
+            }
+        }
+
+        // Redirect to the index page
+        return redirect()->route('natural-person.index');
     }
+
 
     /**
      * Remove the specified resource from storage.

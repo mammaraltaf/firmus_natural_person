@@ -155,35 +155,100 @@
                                 <th>Expiration Date</th>
                             </tr>
                             </thead>
-                            <tbody id="nationalityDocumentsTableBody">
+                            <tbody id="nationalityDocumentsTableBody" data-next-index="{{ $person->nationalities->sum(fn($n) => $n->identifyDocumentNaturalPerson->count()) }}">
                             @foreach($person->nationalities as $nationalities)
-                                    @foreach($nationalities->identifyDocumentNaturalPerson as $document)
-                                        <tr>
-                                            <td>
-                                                <select name="national identities" id="nationality_documents[{{ $loop->index }}][country]" class="form-select select2">
-                                                    <option value="">Select Country</option>
-                                                    @foreach($countries as $country)
-                                                        <option value="{{$country->id_country}}" {{ $country->id_country == $document->nationalityNaturalPerson->id_country ? 'selected' : '' }}>{{$country->country_name_iso_3166 ?? $country->country_smv}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <select name="national identities" id="national
-                                                documents[{{ $loop->index }}][type]" class="form-select select2">
-                                                    <option value="">Select Type</option>
-                                                    @foreach($typeOfIdentityDocuments as $type)
-                                                        <option value="{{$type->id }}" {{ $type->id == $document->type_of_identity_document ? 'selected' : '' }}>{{$type->type}}</option>
-
-                                                        @endforeach
-                                                </select>
-                                            </td>
-                                            <td><input type="text" class="form-control" name="national documents[{{ $loop->index }}][reference_number]" value="{{ $document->reference_number }}" placeholder="Reference Number"></td>
-                                            <td><input type="date" class="form-control" name="national documents[{{ $loop->index }}][expiration_date]" value="{{ \Carbon\Carbon::parse($document->expiration_date)->format('Y-m-d') }}" placeholder="Expiration Date"></td>
+                                @foreach($nationalities->identifyDocumentNaturalPerson as $document)
+                                    <tr>
+                                        <td>
+                                            <select name="nationality_documents[{{ $loop->parent->index }}][country]" id="nationality_documents[{{ $loop->parent->index }}][country]" class="form-select select2">
+                                                <option value="">Select Country</option>
+                                                @foreach($countries as $country)
+                                                    <option value="{{$country->id_country}}" {{ $country->id_country == $document->nationalityNaturalPerson->id_country ? 'selected' : '' }}>{{$country->country_name_iso_3166 ?? $country->country_smv}}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select name="nationality_documents[{{ $loop->parent->index }}][type]" id="nationality_documents[{{ $loop->parent->index }}][type]" class="form-select select2">
+                                                <option value="">Select Type</option>
+                                                @foreach($typeOfIdentityDocuments as $type)
+                                                    <option value="{{$type->id}}" {{ $type->id == $document->type_of_identity_document ? 'selected' : '' }}>{{$type->type}}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" name="nationality_documents[{{ $loop->parent->index }}][reference_number]" value="{{ $document->reference_number }}" placeholder="Reference Number">
+                                        </td>
+                                        <td>
+                                            <input type="date" class="form-control" name="nationality_documents[{{ $loop->parent->index }}][expiration_date]" value="{{ \Carbon\Carbon::parse($document->expiration_date)->format('Y-m-d') }}" placeholder="Expiration Date">
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button>
+                                        </td>
+                                    </tr>
                                 @endforeach
                             @endforeach
                             </tbody>
                         </table>
                         <button type="button" class="btn btn-primary" onclick="addNationalityDocumentsRow(event)">Add Nationality Document</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+ <!-- Address Data Data Section -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header">Address Data</div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>Type of Address</th>
+                                <th>Street Name</th>
+                                <th>Number</th>
+                                <th>Apartment</th>
+                                <th>District</th>
+                                <th>Postal Code</th>
+                                <th>City</th>
+                                <th>Province</th>
+                                <th>Country</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody id="addressTableBody">
+                            @foreach($person->addressNaturalPersons as $address)
+                                <tr>
+                                    <td>
+                                        <select name="addresses[{{$loop->index}}][type]" class="form-select select2">
+                                            <option value="">Select Type of Address</option>
+                                            @foreach($addressType as $type)
+                                                <option value="{{$type->ID}}" {{ $type->ID == $address->type ? 'selected' : '' }}>{{$type->Type}}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td><input type="text" class="form-control" name="addresses[{{$loop->index}}][street_name]" value="{{ $address->street_name }}" placeholder="Street Name"></td>
+                                    <td><input type="text" class="form-control" name="addresses[{{$loop->index}}][number]" value="{{ $address->number }}" placeholder="Number"></td>
+                                    <td><input type="text" class="form-control" name="addresses[{{$loop->index}}][apartment]" value="{{ $address->apartment }}" placeholder="Apartment"></td>
+                                    <td><input type="text" class="form-control" name="addresses[{{$loop->index}}][district]" value="{{ $address->district }}" placeholder="District"></td>
+                                    <td><input type="text" class="form-control" name="addresses[{{$loop->index}}][postal_code]" value="{{ $address->postal_code }}" placeholder="Postal Code"></td>
+                                    <td><input type="text" class="form-control" name="addresses[{{$loop->index}}][city]" value="{{ $address->city }}" placeholder="City"></td>
+                                    <td><input type="text" class="form-control" name="addresses[{{$loop->index}}][province]" value="{{ $address->province }}" placeholder="Province"></td>
+                                    <td>
+                                        <select name="addresses[{{$loop->index}}][country]" class="form-select select2">
+                                            <option value="">Select Country</option>
+                                            @foreach($countries as $country)
+                                                <option value="{{$country->id_country}}" {{ $country->id_country == $address->country ? 'selected' : '' }}>{{$country->country_name_iso_3166 ?? $country->country_smv}}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td><button type="button" class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button></td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+
+                        </table>
+                        <button type="button" class="btn btn-primary" onclick="addAddressRow(event)">Add Address</button>
                     </div>
                 </div>
             </div>
