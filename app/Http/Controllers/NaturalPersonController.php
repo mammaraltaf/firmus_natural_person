@@ -56,85 +56,85 @@ class NaturalPersonController extends Controller
      */
     public function store(Request $request)
     {
-        $naturalPerson = NaturalPerson::create([
-            'prefix' => $request->prefix,
-            'first_name' => $request->first_name,
-            'middle_name' => $request->middle_name,
-            'last_name' => $request->last_name,
-            'other_last_name' => $request->other_last_name,
-            'given_name' => $request->given_name,
-            'date_of_birth' => $request->date_of_birth,
-            'town_of_birth' => $request->town_of_birth,
-            'country_of_birth' => $request->country_of_birth,
-            'civil_status' => $request->civil_status,
-            'Profession' => $request->Profession,
-            'TaxNumber' => $request->taxNumber,
-            'digitoVerificadorRUC' => $request->digitoVerificadorRUC,
-            'codigoUbicacion' => $request->codigoUbicacion,
-        ]);
+        try {
+            $naturalPerson = NaturalPerson::create([
+                'prefix' => $request->prefix,
+                'first_name' => $request->first_name,
+                'middle_name' => $request->middle_name,
+                'last_name' => $request->last_name,
+                'other_last_name' => $request->other_last_name,
+                'given_name' => $request->given_name,
+                'date_of_birth' => $request->date_of_birth,
+                'town_of_birth' => $request->town_of_birth,
+                'country_of_birth' => $request->country_of_birth,
+                'civil_status' => $request->civil_status,
+                'Profession' => $request->Profession,
+                'TaxNumber' => $request->taxNumber,
+                'digitoVerificadorRUC' => $request->digitoVerificadorRUC,
+                'codigoUbicacion' => $request->codigoUbicacion,
+            ]);
 
-        // Handle dynamic fields (Contacts, Addresses, Nationalities, and Nationality Documents)
-        if ($request->has('contacts')) {
-            foreach ($request->contacts as $contact) {
-                // Save each contact data here, e.g., Contact model
-                NaturalPersonContact::create([
-                    'IDNaturalPerson' => $naturalPerson->id_natural_person,
-                    'IDContactType' => $contact['type'],
-                    'Data' => $contact['value'],
-                    'Note' => $contact['description'],
-                    'Authorized' => array_key_exists('authorized',$contact) ? 1 : 0,
-                ]);
+            // Handle dynamic fields (Contacts, Addresses, Nationalities, and Nationality Documents)
+            if ($request->has('contacts')) {
+                foreach ($request->contacts as $contact) {
+                    NaturalPersonContact::create([
+                        'IDNaturalPerson' => $naturalPerson->id_natural_person,
+                        'IDContactType' => $contact['type'],
+                        'Data' => $contact['value'],
+                        'Note' => $contact['description'],
+                        'Authorized' => array_key_exists('authorized', $contact) ? 1 : 0,
+                    ]);
+                }
             }
-        }
 
+            if ($request->has('nationality_documents')) {
+                foreach ($request->nationality_documents as $document) {
+                    $nationalityNaturalPerson = NationalityNaturalPerson::firstOrCreate(
+                        [
+                            'id_natural_person' => $naturalPerson->id_natural_person,
+                            'id_country' => $document['country']
+                        ],
+                        []
+                    );
 
-        if ($request->has('nationality_documents')) {
-            foreach ($request->nationality_documents as $document) {
-                // Check if a nationality record exists for this natural person and country
-                $nationalityNaturalPerson = NationalityNaturalPerson::firstOrCreate(
-                    [
+                    IdentityDocumentNaturalPerson::create([
+                        'id_nationality' => $nationalityNaturalPerson->id_nationality,
+                        'type_of_identity_document' => $document['type'],
+                        'reference_number' => $document['reference'],
+                        'expiration_date' => $document['expiration'],
+                    ]);
+                }
+            }
+
+            if ($request->has('addresses')) {
+                foreach ($request->addresses as $address) {
+                    AddressNaturalPerson::create([
                         'id_natural_person' => $naturalPerson->id_natural_person,
-                        'id_country' => $document['country']
-                    ],
-                    [
-                    ]
-                );
-
-                // Save the document linked to the nationality
-                IdentityDocumentNaturalPerson::create([
-                    'id_nationality' => $nationalityNaturalPerson->id_nationality,
-                    'type_of_identity_document' => $document['type'],
-                    'reference_number' => $document['reference'],
-                    'expiration_date' => $document['expiration'],
-                ]);
+                        'type' => $address['type'],
+                        'street_name' => $address['street'],
+                        'number' => $address['number'],
+                        'apartment' => $address['apartment'],
+                        'district' => $address['district'],
+                        'postal_code' => $address['postal'],
+                        'city' => $address['city'],
+                        'province' => $address['province'],
+                        'country' => $address['country'],
+                    ]);
+                }
             }
-        }
 
-
-
-
-        if ($request->has('addresses')) {
-            foreach ($request->addresses as $address) {
-                // Save each address data here, e.g., Address model
-                AddressNaturalPerson::create([
-                    'id_natural_person' => $naturalPerson->id_natural_person,
-                    'type' => $address['type'],
-                    'street_name' => $address['street'],
-                    'number' => $address['number'],
-                    'apartment' => $address['apartment'],
-                    'district' => $address['district'],
-                    'postal_code' => $address['postal'],
-                    'city' => $address['city'],
-                    'province' => $address['province'],
-                    'country' => $address['country'],
-                ]);
+            if ($naturalPerson) {
+                return redirect()->route('natural-person.index')->with('success', 'Natural person created successfully.');
             }
-        }
+        } catch (\Exception $e) {
+            // Log the error message for debugging
+            Log::error('Error creating natural person: ' . $e->getMessage());
 
-        if ($naturalPerson) {
-            return redirect()->route('natural-person.index');
+            // Redirect back with an error message
+            return redirect()->back()->withInput()->with('error', 'An error occurred while creating the natural person. Please try again.');
         }
     }
+
 
     /**
      * Display the specified resource.
@@ -149,21 +149,53 @@ class NaturalPersonController extends Controller
      */
     public function edit(NaturalPerson $naturalPerson)
     {
-        $person = NaturalPerson::with([
-            'profession', 'civilStatus', 'country', 'nationalities.identifyDocumentNaturalPerson.nationalityNaturalPerson.CountryList' , 'naturalPersonContacts' ,'addressNaturalPersons'
-        ])->where('id_natural_person', $naturalPerson->id_natural_person)->first();
+        try {
+            // Fetch the person with related models
+            $person = NaturalPerson::with([
+                'profession',
+                'civilStatus',
+                'country',
+                'nationalities.identifyDocumentNaturalPerson.nationalityNaturalPerson.CountryList',
+                'naturalPersonContacts',
+                'addressNaturalPersons'
+            ])->where('id_natural_person', $naturalPerson->id_natural_person)->first();
 
-        $naturalPersons = NaturalPerson::with([
-            'profession', 'civilStatus', 'country', 'nationalities.identifyDocumentNaturalPerson' , 'naturalPersonContacts' ,'addressNaturalPersons'
-        ])->get();
-        $countries = CountryList::all();
-        $professions = Profession::all();
-        $civilStatuses = CivilStatus::all();
-        $addressType = TypeOfAddress::all();
-        $typeOfIdentityDocuments = TypeOfIdentityDocument::all();
-        $contactTypes = ContactType::all();
-        return view('natural_persons.edit', compact('naturalPersons', 'countries', 'professions', 'civilStatuses', 'addressType', 'typeOfIdentityDocuments', 'contactTypes','person'));
+            // Fetch all required data
+            $naturalPersons = NaturalPerson::with([
+                'profession',
+                'civilStatus',
+                'country',
+                'nationalities.identifyDocumentNaturalPerson',
+                'naturalPersonContacts',
+                'addressNaturalPersons'
+            ])->get();
+            $countries = CountryList::all();
+            $professions = Profession::all();
+            $civilStatuses = CivilStatus::all();
+            $addressType = TypeOfAddress::all();
+            $typeOfIdentityDocuments = TypeOfIdentityDocument::all();
+            $contactTypes = ContactType::all();
+
+            // Return the edit view
+            return view('natural_persons.edit', compact(
+                'naturalPersons',
+                'countries',
+                'professions',
+                'civilStatuses',
+                'addressType',
+                'typeOfIdentityDocuments',
+                'contactTypes',
+                'person'
+            ));
+        } catch (\Exception $e) {
+            // Log the error message for debugging
+            Log::error('Error fetching data for edit view: ' . $e->getMessage());
+
+            // Redirect back with an error message
+            return redirect()->back()->with('error', 'An error occurred while fetching data for editing. Please try again.');
+        }
     }
+
 
     /**
      * Update the specified resource in storage.
