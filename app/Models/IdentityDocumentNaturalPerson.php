@@ -20,4 +20,14 @@ class IdentityDocumentNaturalPerson extends Model
         'reference_number',
         'expiration_date'
     ];
+
+    public function nationalityNaturalPerson()
+    {
+        return $this->belongsTo(NationalityNaturalPerson::class, 'id_nationality');
+    }
+
+    public function typeOfIdentityDocument()
+    {
+        return $this->belongsTo(TypeOfIdentityDocument::class, 'type_of_identity_document');
+    }
 }

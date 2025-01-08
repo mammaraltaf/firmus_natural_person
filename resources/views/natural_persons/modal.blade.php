@@ -8,7 +8,7 @@
             <div class="modal-body">
                 <form id="personForm" method="post" action="{{route('natural-person.store')}}">
                     @csrf
-{{--                    <input type="hidden" name="_method" value="PUT">--}}
+                    {{--                    <input type="hidden" name="_method" value="PUT">--}}
 
                     <!-- Personal Information Section -->
                     <div class="card mb-4">
@@ -52,7 +52,8 @@
                                     <select id="country_of_birth" name="country_of_birth" class="form-select select2">
                                         <option value="">Select Country</option>
                                         @foreach($countries as $country)
-                                            <option value="{{$country->id_country}}">{{$country->country_name_iso_3166 ?? $country->country_smv}}</option>
+                                            <option
+                                                value="{{$country->id_country}}">{{$country->country_name_iso_3166 ?? $country->country_smv}}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -90,7 +91,8 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label for="digitoVerificadorRUC" class="form-label">digitoVerificadorRUC</label>
-                                    <input type="text" class="form-control" id="digitoVerificadorRUC" name="digitoVerificadorRUC">
+                                    <input type="text" class="form-control" id="digitoVerificadorRUC"
+                                           name="digitoVerificadorRUC">
                                 </div>
                                 <div class="col-md-4">
                                     <label for="codigoUbicacion" class="form-label">codigoUbicacion</label>
@@ -116,7 +118,8 @@
                                 </thead>
                                 <tbody id="contactTableBody"></tbody>
                             </table>
-                            <button type="button" class="btn btn-primary" onclick="addContactRow(event)">Add Contact</button>
+                            <button type="button" class="btn btn-primary" onclick="addContactRow(event)">Add Contact
+                            </button>
                         </div>
                     </div>
 
@@ -137,7 +140,9 @@
                                         </thead>
                                         <tbody id="nationalityDocumentsTableBody"></tbody>
                                     </table>
-                                    <button type="button" class="btn btn-primary" onclick="addNationalityDocumentsRow(event)">Add Nationality Document</button>
+                                    <button type="button" class="btn btn-primary"
+                                            onclick="addNationalityDocumentsRow(event)">Add Nationality Document
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -164,7 +169,8 @@
                                 </thead>
                                 <tbody id="addressTableBody"></tbody>
                             </table>
-                            <button type="button" class="btn btn-primary" onclick="addAddressRow(event)">Add Address</button>
+                            <button type="button" class="btn btn-primary" onclick="addAddressRow(event)">Add Address
+                            </button>
                         </div>
                     </div>
 
@@ -206,11 +212,14 @@
         const rowCount = tableBody.querySelectorAll('tr').length; // Get the current row count
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
-            <td><select id="country" name="addresses[${rowCount}][type]" class="form-select select2">
+        <td>
+            <select id="addressType_${rowCount}" name="addresses[${rowCount}][type]" class="form-select select2">
                 <option value="">Select Type of Address</option>
                  @foreach($addressType as $address)
-        <option value="{{$address->ID}}">{{$address->Type}}</option>@endforeach
-        </select></td>
+                        <option value="{{$address->ID}}">{{$address->Type}}</option>
+                @endforeach
+            </select>
+        </td>
         <td><input type="text" name="addresses[${rowCount}][street]" class="form-control" placeholder="Street Name"></td>
         <td><input type="text" name="addresses[${rowCount}][number]" class="form-control" placeholder="Number"></td>
         <td><input type="text" name="addresses[${rowCount}][apartment]" class="form-control" placeholder="Apartment"></td>
@@ -218,13 +227,16 @@
         <td><input type="text" name="addresses[${rowCount}][postal]" class="form-control" placeholder="Postal Code"></td>
         <td><input type="text" name="addresses[${rowCount}][city]" class="form-control" placeholder="City"></td>
         <td><input type="text" name="addresses[${rowCount}][province]" class="form-control" placeholder="Province"></td>
-        <td><select id="country" name="addresses[${rowCount}][country]" class="form-select select2">
-            <option value="">Select Country</option>
-@foreach($countries as $country)
-                <option value="{{$country->id_country}}">{{$country->country_name_iso_3166 ?? $country->country_smv}}</option>@endforeach
-            </select></td>
-<td><button type="button" class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button></td>
-`;
+        <td>
+            <select id="country_${rowCount}" name="addresses[${rowCount}][country]" class="form-select select2">
+                <option value="">Select Country</option>
+                @foreach($countries as $country)
+                    <option value="{{$country->id_country}}">{{$country->country_name_iso_3166 ?? $country->country_smv}}</option>
+                @endforeach
+            </select>
+        </td>
+        <td><button type="button" class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button></td>
+        `;
         tableBody.appendChild(newRow);
     }
 

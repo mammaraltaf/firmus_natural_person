@@ -148,10 +148,20 @@ class NaturalPersonController extends Controller
      */
     public function edit(NaturalPerson $naturalPerson)
     {
+        $person = NaturalPerson::with([
+            'profession', 'civilStatus', 'country', 'nationalities.identifyDocumentNaturalPerson.nationalityNaturalPerson.CountryList' , 'naturalPersonContacts' ,'addressNaturalPersons'
+        ])->where('id_natural_person', $naturalPerson->id_natural_person)->first();
+
+        $naturalPersons = NaturalPerson::with([
+            'profession', 'civilStatus', 'country', 'nationalities.identifyDocumentNaturalPerson' , 'naturalPersonContacts' ,'addressNaturalPersons'
+        ])->get();
+        $countries = CountryList::all();
         $professions = Profession::all();
         $civilStatuses = CivilStatus::all();
-        $countries = CountryList::all();
-        return view('natural_persons.edit', compact('naturalPerson', 'professions', 'civilStatuses', 'countries'));
+        $addressType = TypeOfAddress::all();
+        $typeOfIdentityDocuments = TypeOfIdentityDocument::all();
+        $contactTypes = ContactType::all();
+        return view('natural_persons.edit', compact('naturalPersons', 'countries', 'professions', 'civilStatuses', 'addressType', 'typeOfIdentityDocuments', 'contactTypes','person'));
     }
 
     /**
