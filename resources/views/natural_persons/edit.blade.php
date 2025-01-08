@@ -1,3 +1,12 @@
+@extends('layouts.app')
+
+@section('title', 'Person Management')
+@section('styles')
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css"/>
+
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+@endsection
+@section('content')
 <div class="container">
     <h2>Update Natural Person</h2>
     <form id="personUpdateForm" method="post" action="{{route('natural-person.update', $person->id_natural_person)}}">
@@ -185,3 +194,88 @@
         </div>
     </form>
 </div>
+@endsection
+<script>
+    function addContactRow(event) {
+        event.preventDefault();
+        const tableBody = document.getElementById('contactTableBody');
+        const rowCount = tableBody.querySelectorAll('tr').length; // Get the current row count
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+        <td><select id="country" name="contacts[${rowCount}][type]" class="form-select select2">
+            <option value="">Select Type of Contact</option>
+@foreach($contactTypes as $contact)
+        <option value="{{$contact->ID}}">{{$contact->Type}}</option>@endforeach
+        </select></td>
+        <td><input type="text" class="form-control" name="contacts[${rowCount}][value]" placeholder="Value"></td>
+        <td><input type="text" class="form-control" name="contacts[${rowCount}][description]" placeholder="Description/Notes"></td>
+        <td><input type="checkbox" name="contacts[${rowCount}][authorized]"></td>
+        <td><button type="button" class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button></td>
+    `;
+        tableBody.appendChild(newRow);
+    }
+
+
+    function addAddressRow(event) {
+        event.preventDefault();
+        const tableBody = document.getElementById('addressTableBody');
+        const rowCount = tableBody.querySelectorAll('tr').length; // Get the current row count
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+        <td>
+            <select id="addressType_${rowCount}" name="addresses[${rowCount}][type]" class="form-select select2">
+                <option value="">Select Type of Address</option>
+                 @foreach($addressType as $address)
+        <option value="{{$address->ID}}">{{$address->Type}}</option>
+                @endforeach
+        </select>
+    </td>
+    <td><input type="text" name="addresses[${rowCount}][street]" class="form-control" placeholder="Street Name"></td>
+        <td><input type="text" name="addresses[${rowCount}][number]" class="form-control" placeholder="Number"></td>
+        <td><input type="text" name="addresses[${rowCount}][apartment]" class="form-control" placeholder="Apartment"></td>
+        <td><input type="text" name="addresses[${rowCount}][district]" class="form-control" placeholder="District"></td>
+        <td><input type="text" name="addresses[${rowCount}][postal]" class="form-control" placeholder="Postal Code"></td>
+        <td><input type="text" name="addresses[${rowCount}][city]" class="form-control" placeholder="City"></td>
+        <td><input type="text" name="addresses[${rowCount}][province]" class="form-control" placeholder="Province"></td>
+        <td>
+            <select id="country_${rowCount}" name="addresses[${rowCount}][country]" class="form-select select2">
+                <option value="">Select Country</option>
+                @foreach($countries as $country)
+        <option value="{{$country->id_country}}">{{$country->country_name_iso_3166 ?? $country->country_smv}}</option>
+                @endforeach
+        </select>
+    </td>
+    <td><button type="button" class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button></td>
+`;
+        tableBody.appendChild(newRow);
+    }
+
+
+    function addNationalityDocumentsRow(event) {
+        event.preventDefault();
+        const tableBody = document.getElementById('nationalityDocumentsTableBody');
+        const rowCount = tableBody.querySelectorAll('tr').length; // Get the current row count
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+         <td><select id="country" name="nationality_documents[${rowCount}][country]" class="form-select select2">
+            <option value="">Select Country</option>
+@foreach($countries as $country)
+        <option value="{{$country->id_country}}">{{$country->country_name_iso_3166 ?? $country->country_smv}}</option>@endforeach
+        </select></td>
+        <td><select id="country" name="nationality_documents[${rowCount}][type]" class="form-select select2">
+            <option value="">Select Type</option>
+@foreach($typeOfIdentityDocuments as $document)
+        <option value="{{$document->id}}">{{$document->type}}</option>@endforeach
+        </select></td>
+            <td><input type="text" name="nationality_documents[${rowCount}][reference]" class="form-control" placeholder="Reference Number"></td>
+            <td><input type="date" name="nationality_documents[${rowCount}][expiration]" class="form-control" placeholder="Expiration Date"></td>
+        <td><button type="button" class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button></td>
+        `;
+        tableBody.appendChild(newRow);
+    }
+
+    function deleteRow(button) {
+        const row = button.closest('tr');
+        row.remove();
+    }
+</script>
