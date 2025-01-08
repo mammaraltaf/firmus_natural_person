@@ -176,10 +176,10 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control" name="nationality_documents[{{ $loop->parent->index }}][reference_number]" value="{{ $document->reference_number }}" placeholder="Reference Number">
+                                            <input type="text" class="form-control" name="nationality_documents[{{ $loop->parent->index }}][reference]" value="{{ $document->reference_number }}" placeholder="Reference Number">
                                         </td>
                                         <td>
-                                            <input type="date" class="form-control" name="nationality_documents[{{ $loop->parent->index }}][expiration_date]" value="{{ \Carbon\Carbon::parse($document->expiration_date)->format('Y-m-d') }}" placeholder="Expiration Date">
+                                            <input type="date" class="form-control" name="nationality_documents[{{ $loop->parent->index }}][expiration]" value="{{ \Carbon\Carbon::parse($document->expiration_date)->format('Y-m-d') }}" placeholder="Expiration Date">
                                         </td>
                                         <td>
                                             <button type="button" class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button>

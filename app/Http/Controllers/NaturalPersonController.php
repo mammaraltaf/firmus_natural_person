@@ -206,9 +206,22 @@ class NaturalPersonController extends Controller
                 ]);
             }
         }
+        else{
+            NaturalPersonContact::where('IDNaturalPerson', $naturalPerson->id_natural_person)->delete();
+        }
 
         // Update Nationality Documents
         if ($request->has('nationality_documents')) {
+            // Step 1: Retrieve all related nationalities for the natural person
+            $nationalityIds = NationalityNaturalPerson::where('id_natural_person', $naturalPerson->id_natural_person)
+                ->pluck('id_nationality');
+
+            // Step 2: Delete dependent identity document records for all retrieved nationalities
+            IdentityDocumentNaturalPerson::whereIn('id_nationality', $nationalityIds)->delete();
+
+            // Step 3: Delete all related nationalities for the natural person
+            NationalityNaturalPerson::where('id_natural_person', $naturalPerson->id_natural_person)->delete();
+
             foreach ($request->nationality_documents as $document) {
                 // Check or create nationality record
                 $nationalityNaturalPerson = NationalityNaturalPerson::firstOrCreate(
@@ -226,10 +239,29 @@ class NaturalPersonController extends Controller
                         'type_of_identity_document' => $document['type'],
                     ],
                     [
-                        'reference_number' => $document['reference_number'],
-                        'expiration_date' => $document['expiration_date'],
+                        'reference_number' => $document['reference'],
+                        'expiration_date' => $document['expiration'],
                     ]
                 );
+            }
+        }
+        else{
+            try {
+                // Step 1: Retrieve all related nationalities for the natural person
+                $nationalityIds = NationalityNaturalPerson::where('id_natural_person', $naturalPerson->id_natural_person)
+                    ->pluck('id_nationality');
+
+                // Step 2: Delete dependent identity document records for all retrieved nationalities
+                IdentityDocumentNaturalPerson::whereIn('id_nationality', $nationalityIds)->delete();
+
+                // Step 3: Delete all related nationalities for the natural person
+                NationalityNaturalPerson::where('id_natural_person', $naturalPerson->id_natural_person)->delete();
+            } catch (\Exception $e) {
+                // Catch and handle any errors
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $e->getMessage(),
+                ], 500);
             }
         }
 
@@ -253,6 +285,9 @@ class NaturalPersonController extends Controller
                     'country' => array_key_exists('country', $address) ? $address['country'] : null,
                 ]);
             }
+        }
+        else{
+            AddressNaturalPerson::where('id_natural_person', $naturalPerson->id_natural_person)->delete();
         }
 
         // Redirect to the index page
