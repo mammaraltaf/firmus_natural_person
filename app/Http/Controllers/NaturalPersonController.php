@@ -245,50 +245,26 @@ class NaturalPersonController extends Controller
 
         // Update Nationality Documents
         if ($request->has('nationality_documents')) {
-            // Step 1: Retrieve all related nationalities for the natural person
-            $nationalityIds = NationalityNaturalPerson::where('id_natural_person', $naturalPerson->id_natural_person)
-                ->pluck('id_nationality');
-
-            // Step 2: Delete dependent identity document records for all retrieved nationalities
-            IdentityDocumentNaturalPerson::whereIn('id_nationality', $nationalityIds)->delete();
-
-            // Step 3: Delete all related nationalities for the natural person
-            NationalityNaturalPerson::where('id_natural_person', $naturalPerson->id_natural_person)->delete();
-
+            $this->deleteNationalityAndDocuments($naturalPerson);
             foreach ($request->nationality_documents as $document) {
-                // Check or create nationality record
-                $nationalityNaturalPerson = NationalityNaturalPerson::firstOrCreate(
+                $nationalityNaturalPerson = NationalityNaturalPerson::create(
                     [
                         'id_natural_person' => $naturalPerson->id_natural_person,
                         'id_country' => $document['country']
-                    ],
-                    []
-                );
-
-                // Update or create the identity document
-                IdentityDocumentNaturalPerson::updateOrCreate(
-                    [
-                        'id_nationality' => $nationalityNaturalPerson->id_nationality,
-                        'type_of_identity_document' => $document['type'],
-                    ],
-                    [
-                        'reference_number' => $document['reference'],
-                        'expiration_date' => $document['expiration'],
                     ]
                 );
+
+                IdentityDocumentNaturalPerson::create([
+                    'id_nationality' => $nationalityNaturalPerson->id_nationality,
+                    'type_of_identity_document' => $document['type'],
+                    'reference_number' => $document['reference'],
+                    'expiration_date' => $document['expiration'],
+                ]);
             }
         }
         else{
             try {
-                // Step 1: Retrieve all related nationalities for the natural person
-                $nationalityIds = NationalityNaturalPerson::where('id_natural_person', $naturalPerson->id_natural_person)
-                    ->pluck('id_nationality');
-
-                // Step 2: Delete dependent identity document records for all retrieved nationalities
-                IdentityDocumentNaturalPerson::whereIn('id_nationality', $nationalityIds)->delete();
-
-                // Step 3: Delete all related nationalities for the natural person
-                NationalityNaturalPerson::where('id_natural_person', $naturalPerson->id_natural_person)->delete();
+                $this->deleteNationalityAndDocuments($naturalPerson);
             } catch (\Exception $e) {
                 // Catch and handle any errors
                 return response()->json([
@@ -325,6 +301,18 @@ class NaturalPersonController extends Controller
 
         // Redirect to the index page
         return redirect()->route('natural-person.index');
+    }
+
+    private function deleteNationalityAndDocuments($naturalPerson)
+    {
+        // Step 1: Retrieve all related nationalities for the natural person
+        $nationalityIds = NationalityNaturalPerson::where('id_natural_person', $naturalPerson->id_natural_person)
+            ->pluck('id_nationality');
+        // Step 2: Delete dependent identity document records for all retrieved nationalities
+        IdentityDocumentNaturalPerson::whereIn('id_nationality', $nationalityIds)->delete();
+        // Step 3: Delete all related nationalities for the natural person
+        NationalityNaturalPerson::where('id_natural_person', $naturalPerson->id_natural_person)->delete();
+        return true;
     }
 
 
