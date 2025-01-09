@@ -9,7 +9,7 @@ class ContactType extends Model
 {
     use HasFactory;
 
-    protected $table = 'contacttype';
+    protected $table = 'ContactType';
     protected $primaryKey = 'ID';
     public $timestamps = false;
 

@@ -9,7 +9,7 @@ class NaturalPersonContact extends Model
 {
     use HasFactory;
 
-    protected $table = 'natural_person_contact';
+    protected $table = 'Natural_Person_Contact';
     protected $primaryKey = 'ID';
     public $timestamps = false;
 

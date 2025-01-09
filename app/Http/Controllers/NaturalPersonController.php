@@ -381,6 +381,10 @@ class NaturalPersonController extends Controller
 
                 // Normalize the civil status
                 $civilStatus = strtolower(trim($ff_apn_es_record->E_C_Status));
+                $countryName = strtolower(trim($ff_apn_es_record->E_Country));
+                $countryId = CountryList::where("country_smv",$countryName)?->first()?->id;
+                //	dd($ff_apn_es_record,$countryId);
+
 
                 // Update or create the NaturalPerson record
                 NaturalPerson::updateOrCreate(
@@ -389,21 +393,22 @@ class NaturalPersonController extends Controller
                         'last_name' => $ff_apn_es_record->E_surname,
                         'date_of_birth' => $ff_apn_es_record->E_Birth_Date ?? null,
                         'town_of_birth' => $ff_apn_es_record->E_Birth_Place,
-                        'country_of_birth' => $ff_apn_es_record->E_Country,
-                        'civil_status' => $civilStatus,
-                        'Profession' => $ff_apn_es_record->E_Profession,
+                        //      'country_of_birth' => $countryId ?? null,
+                        //      'civil_status' => $civilStatus,
+                        //     'Profession' => $ff_apn_es_record->E_Profession,
                     ],
                     [
                         'first_name' => $ff_apn_es_record->E_Name,
                         'last_name' => $ff_apn_es_record->E_surname,
                         'date_of_birth' => self::validateDate($ff_apn_es_record->E_Birth_Date) ? $ff_apn_es_record->E_Birth_Date : null,
                         'town_of_birth' => $ff_apn_es_record->E_Birth_Place,
-                        'country_of_birth' => $ff_apn_es_record->E_Country,
-                        'civil_status' => $civilStatus,
-                        'Profession' => $ff_apn_es_record->E_Profession,
+                        //     'country_of_birth' => $ff_apn_es_record->E_Country,
+                        //     'civil_status' => $civilStatus,
+                        //     'Profession' => $ff_apn_es_record->E_Profession,
                     ]
                 );
             } catch (\Exception $e) {
+                dd($e->getMessage());
                 // Log the error for debugging
                 Log::error("Error importing natural person ID {$ff_apn_es_id}: " . $e->getMessage());
 
